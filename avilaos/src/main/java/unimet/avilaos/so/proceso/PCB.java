@@ -1,5 +1,7 @@
 package unimet.avilaos.so.proceso;
 
+import unimet.avilaos.sincronizacion.BufferAcotado;
+
 
 public class PCB {
 
@@ -26,6 +28,26 @@ public class PCB {
     private long ciclosEnListo = 0;
     private long ciclosEnEjecucion = 0;
     private long ciclosBloqueado = 0;
+
+    private int mar = 0;
+    private int ciclosEnCpu = 0;
+
+    // I/O bound
+    private int esCada = 0;
+    private int duracionES = 0;
+    private int desdeUltimaES = 0;
+
+    // productor / consumidor
+    private BufferAcotado buffer;
+    private int cadaCuantosCiclos = 1;
+    private int elementosRequeridos = 0;
+    private int elementosHechos = 0;
+    private FaseProductorConsumidor fase;
+    private int contadorFase = 0;
+    private boolean tieneMutex = false;
+    private boolean reservoHueco = false;
+    private long bloqueadoDesde = -1;
+    private long ciclosEnSemaforos = 0;
 
     public PCB(long id, String nombre, int idComputador, TipoProceso tipo, int prioridad,
             int memoria, int instrucciones, int deadline, long cicloCreacion) {
@@ -105,6 +127,8 @@ public class PCB {
             throw new IllegalStateException(this + " no esta en ejecucion");
         }
         contadorPrograma++;
+        mar++;
+        ciclosEnCpu++;
         if (tiempoRestante > 0) {
             tiempoRestante--;
         }
@@ -142,6 +166,80 @@ public class PCB {
     public long tiempoRetorno() {
         return cicloFinalizacion < 0 ? -1 : cicloFinalizacion - cicloCreacion;
     }
+
+    /** I/O bound: cada cuantas instrucciones pide E/S y cuantos ciclos tarda. */
+    public void configurarES(int cada, int duracion) {
+        if (tipo != TipoProceso.IO_BOUND) {
+            throw new IllegalStateException("Solo los I/O bound hacen E/S");
+        }
+        if (cada < 1 || duracion < 1) {
+            throw new IllegalArgumentException("Los ciclos de E/S deben ser al menos 1");
+        }
+        this.esCada = cada;
+        this.duracionES = duracion;
+    }
+
+    /** Productor/consumidor: buffer, cada cuantos ciclos produce/consume y cuantos elementos necesita. */
+    public void configurarBuffer(BufferAcotado buffer, int cadaCuantos, int elementos) {
+        if (!tipo.usaBuffer()) {
+            throw new IllegalStateException("Solo productores y consumidores usan buffer");
+        }
+        if (buffer == null || cadaCuantos < 1 || elementos < 1) {
+            throw new IllegalArgumentException("Datos del buffer invalidos");
+        }
+        this.buffer = buffer;
+        this.cadaCuantosCiclos = cadaCuantos;
+        this.elementosRequeridos = elementos;
+        this.fase = tipo == TipoProceso.PRODUCTOR
+                ? FaseProductorConsumidor.PRODUCIR : FaseProductorConsumidor.ACCESO_RED;
+    }
+
+    /**
+     * Un productor/consumidor solo termina en un punto seguro: fuera de la
+     * region critica y sin huecos reservados.
+     */
+    public boolean puedeTerminar() {
+        if (!tipo.usaBuffer()) {
+            return haTerminadoTrabajo();
+        }
+        boolean puntoSeguro = tipo == TipoProceso.PRODUCTOR
+                ? fase == FaseProductorConsumidor.PRODUCIR && contadorFase == 0
+                : fase == FaseProductorConsumidor.ACCESO_RED;
+        return puntoSeguro && !tieneMutex && !reservoHueco
+                && (elementosHechos >= elementosRequeridos || haTerminadoTrabajo());
+    }
+
+    public boolean esLocalA(int computador) {
+        return buffer == null || buffer.getAnfitrion() == computador;
+    }
+
+    public void reiniciarCiclosEnCpu() { ciclosEnCpu = 0; }
+    public void sumarElemento() { elementosHechos++; }
+    public void sumarCiclosEnSemaforos(long c) { ciclosEnSemaforos += c; }
+
+    public int getMar() { return mar; }
+    public int getCiclosEnCpu() { return ciclosEnCpu; }
+    public int getEsCada() { return esCada; }
+    public int getDuracionES() { return duracionES; }
+    public int getDesdeUltimaES() { return desdeUltimaES; }
+    public void setDesdeUltimaES(int v) { desdeUltimaES = v; }
+    public BufferAcotado getBuffer() { return buffer; }
+    public int getCadaCuantosCiclos() { return cadaCuantosCiclos; }
+    public int getElementosRequeridos() { return elementosRequeridos; }
+    public int getElementosHechos() { return elementosHechos; }
+    public FaseProductorConsumidor getFase() { return fase; }
+    public void setFase(FaseProductorConsumidor f) { fase = f; }
+    public int getContadorFase() { return contadorFase; }
+    public void setContadorFase(int c) { contadorFase = c; }
+    public boolean tieneMutex() { return tieneMutex; }
+    public void setTieneMutex(boolean b) { tieneMutex = b; }
+    public boolean reservoHueco() { return reservoHueco; }
+    public void setReservoHueco(boolean b) { reservoHueco = b; }
+    public long getBloqueadoDesde() { return bloqueadoDesde; }
+    public void setBloqueadoDesde(long c) { bloqueadoDesde = c; }
+    public long getCiclosEnSemaforos() { return ciclosEnSemaforos; }
+
+    public String getEtiqueta() { return "P" + id + "-C" + idComputador; }
 
     public long getId() { return id; }
     public String getNombre() { return nombre; }
