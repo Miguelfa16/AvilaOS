@@ -18,6 +18,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import unimet.avilaos.cluster.Cluster;
@@ -43,6 +44,7 @@ public class VentanaPrincipal extends JFrame {
     });
     private final JTextArea log = new JTextArea();
     private final GraficaUtilizacion grafica;
+    private final Timer refresco = new Timer(100, e -> refrescar());
 
     public VentanaPrincipal(Cluster cluster) {
         super("AvilaOS - Simulador de sistema operativo distribuido");
@@ -65,6 +67,8 @@ public class VentanaPrincipal extends JFrame {
         nuevoBuffer.addActionListener(e -> new DialogoBuffer(this, cluster).setVisible(true));
         JButton guardar = new JButton("Guardar configuracion");
         guardar.addActionListener(e -> guardar());
+        JButton reiniciar = new JButton("Reiniciar");
+        reiniciar.addActionListener(e -> reiniciar());
 
         ciclo.setFont(ciclo.getFont().deriveFont(16f));
         barra.add(iniciarPausar);
@@ -79,6 +83,7 @@ public class VentanaPrincipal extends JFrame {
         barra.add(nuevoProceso);
         barra.add(nuevoBuffer);
         barra.add(guardar);
+        barra.add(reiniciar);
         barra.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
 
         // ---- computadores
@@ -111,7 +116,30 @@ public class VentanaPrincipal extends JFrame {
         setSize(1350, 900);
         setLocationRelativeTo(null);
 
-        new Timer(100, e -> refrescar()).start();
+        refresco.start();
+    }
+
+    /** Pide la configuracion y abre la ventana principal. Si la cancelan, se cierra el programa. */
+    public static void abrir() {
+        Cluster cluster = new VentanaConfiguracion().mostrar();
+        if (cluster == null) {
+            System.exit(0);
+        }
+        new VentanaPrincipal(cluster).setVisible(true);
+    }
+
+    /** Para esta simulacion y vuelve a la ventana de configuracion. */
+    private void reiniciar() {
+        int r = JOptionPane.showConfirmDialog(this,
+                "Se pierde la simulacion actual (si la quieres, guardala antes).\nReiniciar?",
+                "Reiniciar", JOptionPane.YES_NO_OPTION);
+        if (r != JOptionPane.YES_OPTION) {
+            return;
+        }
+        cluster.getReloj().detener();
+        refresco.stop();
+        SwingUtilities.invokeLater(VentanaPrincipal::abrir);
+        dispose();
     }
 
     private void iniciarOPausar() {
