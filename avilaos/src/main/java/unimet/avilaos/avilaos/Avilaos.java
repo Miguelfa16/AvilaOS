@@ -1,16 +1,25 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package unimet.avilaos.avilaos;
 
-/**
- *
- * @author malej
- */
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import unimet.avilaos.cluster.Cluster;
+import unimet.avilaos.gui.VentanaConfiguracion;
+import unimet.avilaos.gui.VentanaPrincipal;
+
 public class Avilaos {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception ignorada) {
+                // se queda el look por defecto
+            }
+            Cluster cluster = new VentanaConfiguracion().mostrar();
+            if (cluster == null) {
+                System.exit(0);
+            }
+            new VentanaPrincipal(cluster).setVisible(true);
+        });
     }
 }
