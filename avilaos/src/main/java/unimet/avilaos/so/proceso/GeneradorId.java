@@ -2,6 +2,7 @@ package unimet.avilaos.so.proceso;
 
 import java.util.concurrent.Semaphore;
 
+/** Reparte IDs unicos en todo el cluster. Usa un semaforo porque varios hilos piden IDs. */
 public class GeneradorId {
 
     private final Semaphore mutex = new Semaphore(1);

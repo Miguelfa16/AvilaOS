@@ -3,6 +3,10 @@ package unimet.avilaos.so.proceso;
 import unimet.avilaos.sincronizacion.BufferAcotado;
 
 
+/**
+ * Ficha de un proceso: id, estado, prioridad, deadline, memoria, PC, MAR y
+ * los datos extra para E/S y productor-consumidor.
+ */
 public class PCB {
 
     private final long id;
@@ -85,6 +89,7 @@ public class PCB {
         this.deadlineRestante = deadline;
     }
 
+    /** Cambia de estado. Si el cambio no tiene sentido (por ejemplo, de Nuevo a Bloqueado) lanza una excepcion. */
     public void cambiarEstado(EstadoProceso destino, long ciclo) {
         if (destino == EstadoProceso.BLOQUEADO) {
             throw new IllegalArgumentException("Para bloquear use bloquear(motivo, ciclo)");
@@ -122,6 +127,7 @@ public class PCB {
         estado = destino;
     }
 
+    /** Una instruccion ejecutada: suben el PC y el MAR y baja el tiempo restante. */
     public void ejecutarInstruccion() {
         if (estado != EstadoProceso.EJECUCION) {
             throw new IllegalStateException(this + " no esta en ejecucion");
@@ -134,6 +140,10 @@ public class PCB {
         }
     }
 
+    /**
+     * Resta un ciclo al deadline.
+     * @return true si ya se vencio
+     */
     public boolean descontarDeadline() {
         if (deadlineRestante > 0) {
             deadlineRestante--;

@@ -1,5 +1,6 @@
 package unimet.avilaos.so.planificacion;
 
+/** Crea la politica que corresponde a cada TipoPolitica. */
 public final class FabricaPoliticas {
 
     private FabricaPoliticas() {

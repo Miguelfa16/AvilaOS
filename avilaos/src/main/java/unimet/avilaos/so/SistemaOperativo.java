@@ -85,6 +85,7 @@ public class SistemaOperativo implements ComponenteDeReloj, ManejadorInterrupcio
     //  Llamadas desde la GUI o el cluster (otros hilos)
     // =================================================================
 
+    /** Cambia la politica en caliente y reordena la cola de listos. */
     public void cambiarPolitica(PoliticaPlanificacion nuevaPolitica) {
         candado.cerrar();
         try {
@@ -177,6 +178,10 @@ public class SistemaOperativo implements ComponenteDeReloj, ManejadorInterrupcio
     //  Ciclo de reloj
     // =================================================================
 
+    /**
+     * Lo que hace el sistema operativo al empezar cada ciclo: atiende avisos,
+     * revisa deadlines, admite nuevos si hay RAM y escoge quien va a la CPU.
+     */
     @Override
     public void alTick(long ciclo) {
         candado.cerrar();
@@ -216,6 +221,10 @@ public class SistemaOperativo implements ComponenteDeReloj, ManejadorInterrupcio
         }
     }
 
+    /**
+     * Pasa a Listos a los que despertaron por fin de E/S o por un semSignal.
+     * Los avisos de otros computadores llegan aqui y no directo, para no tomar dos candados a la vez.
+     */
     private void atenderBuzon() {
         Cola<Aviso> avisos;
         candadoBuzon.cerrar();
@@ -247,6 +256,7 @@ public class SistemaOperativo implements ComponenteDeReloj, ManejadorInterrupcio
         }
     }
 
+    /** Baja el deadline de todos y termina a los que se les acabo. */
     private void revisarDeadlines(long ciclo) {
         ListaEnlazada<PCB> vencidos = new ListaEnlazada<>();
         revisarDeadlineEn(nuevos.recorrido(), vencidos);
@@ -415,6 +425,7 @@ public class SistemaOperativo implements ComponenteDeReloj, ManejadorInterrupcio
         }
     }
 
+    /** semWait de Stallings: si el semaforo queda negativo el proceso se bloquea. */
     private void semWait(PCB p, BufferAcotado b, SemaforoSO s, MotivoBloqueo motivo) {
         sistema(p, "semWait(" + s.getNombre() + ") " + b.getNombre());
         boolean seBloquea;
@@ -438,6 +449,7 @@ public class SistemaOperativo implements ComponenteDeReloj, ManejadorInterrupcio
         }
     }
 
+    /** semSignal de Stallings: si habia alguien esperando, lo despierta. */
     private void semSignal(PCB p, BufferAcotado b, SemaforoSO s) {
         sistema(p, "semSignal(" + s.getNombre() + ") " + b.getNombre());
         b.cerrar();
@@ -456,6 +468,7 @@ public class SistemaOperativo implements ComponenteDeReloj, ManejadorInterrupcio
         cpu.cargar(p, ModoEjecucion.SISTEMA_OPERATIVO, que, true);
     }
 
+    /** Saca al proceso de la CPU y lo manda a Bloqueados con su motivo. */
     private void bloquear(PCB p, MotivoBloqueo motivo, int ciclos) {
         cpu.liberar();
         p.bloquear(motivo, ciclo);

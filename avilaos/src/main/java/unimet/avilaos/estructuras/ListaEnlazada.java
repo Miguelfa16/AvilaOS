@@ -1,6 +1,10 @@
 package unimet.avilaos.estructuras;
 
 
+/**
+ * Lista doblemente enlazada hecha por nosotros (no usamos java.util).
+ * Es la base de Cola, Pila y ListaOrdenada.
+ */
 public class ListaEnlazada<T> {
 
     private Nodo<T> primero;

@@ -43,6 +43,7 @@ public class RelojGlobal implements Runnable {
         this.trasCiclo = r;
     }
 
+    /** Arranca (o reanuda) el reloj. */
     public void iniciar() {
         if (!corriendo) {
             corriendo = true;
@@ -50,6 +51,7 @@ public class RelojGlobal implements Runnable {
         }
     }
 
+    /** Deja el reloj quieto hasta que se llame a iniciar() o paso(). */
     public void pausar() {
         corriendo = false;
     }
@@ -61,6 +63,7 @@ public class RelojGlobal implements Runnable {
         }
     }
 
+    /** Para el reloj del todo y termina su hilo. Se usa al reiniciar. */
     public void detener() {
         vivo = false;
         corriendo = false;
@@ -85,6 +88,10 @@ public class RelojGlobal implements Runnable {
         }
     }
 
+    /**
+     * Un ciclo: suelta a todos los computadores y espera a que todos terminen.
+     * Asi ninguno se adelanta.
+     */
     private void tic() {
         mutex.acquireUninterruptibly();
         try {
