@@ -50,6 +50,7 @@ public class BufferAcotado {
 
     // ---- operaciones (quien llama debe tener cerrar()) ----
 
+    /** Mete un elemento. Solo se llama con el mutex tomado. */
     public void insertar(PCB productor) {
         huecos[entrada] = productor.getId();
         entrada = (entrada + 1) % capacidad;
@@ -57,6 +58,7 @@ public class BufferAcotado {
         producidos++;
     }
 
+    /** Saca un elemento. Solo se llama con el mutex tomado. */
     public void extraer() {
         huecos[salida] = 0;
         salida = (salida + 1) % capacidad;

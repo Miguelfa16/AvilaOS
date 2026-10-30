@@ -1,5 +1,6 @@
 package unimet.avilaos.hardware;
 
+/** RAM de un computador. Solo lleva la cuenta de cuanto esta usado y cuanto queda. */
 public class MemoriaPrincipal {
 
     private final int capacidad;
@@ -29,6 +30,7 @@ public class MemoriaPrincipal {
         return getLibre() >= cantidad;
     }
 
+    /** Aparta memoria para un proceso o buffer. Falla si no hay suficiente. */
     public void asignar(int cantidad) {
         if (!hayEspacio(cantidad)) {
             throw new IllegalStateException();
@@ -36,6 +38,7 @@ public class MemoriaPrincipal {
         enUso += cantidad;
     }
 
+    /** Devuelve memoria cuando un proceso termina. */
     public void liberar(int cantidad) {
         if (enUso - cantidad < 0) {
             throw new IllegalStateException();

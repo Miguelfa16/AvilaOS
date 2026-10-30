@@ -1,5 +1,6 @@
 package unimet.avilaos.estructuras;
 
+/** Pila LIFO sobre ListaEnlazada. */
 public class Pila<T> {
 
     private final ListaEnlazada<T> elementos = new ListaEnlazada<>();

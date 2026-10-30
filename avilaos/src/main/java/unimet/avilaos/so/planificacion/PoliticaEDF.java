@@ -4,6 +4,7 @@ import unimet.avilaos.estructuras.Comparador;
 import unimet.avilaos.so.proceso.PCB;
 
 
+/** Earliest Deadline First: primero el que tenga el deadline mas cerca. */
 public class PoliticaEDF implements PoliticaPlanificacion {
 
     private static final Comparador<PCB> ORDEN =

@@ -2,6 +2,10 @@ package unimet.avilaos.so.planificacion;
 
 import unimet.avilaos.estructuras.Comparador;
 import unimet.avilaos.so.proceso.PCB;
+/**
+ * Round Robin: todos en orden de llegada, pero cada uno solo usa la CPU
+ * durante el quantum y despues vuelve al final de la cola.
+ */
 public class PoliticaRoundRobin implements PoliticaPlanificacion {
 
     private static final Comparador<PCB> ORDEN = (a, b) -> 0;
@@ -33,6 +37,7 @@ public class PoliticaRoundRobin implements PoliticaPlanificacion {
         return ORDEN;
     }
 
+    /** Se le acaba el turno cuando llega al quantum. */
     @Override
     public boolean debeExpropiar(PCB enEjecucion, PCB candidato, int ciclosEnCpu) {
         return ciclosEnCpu >= quantum;

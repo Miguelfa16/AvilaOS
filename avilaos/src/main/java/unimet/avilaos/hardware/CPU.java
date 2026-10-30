@@ -17,6 +17,10 @@ public class CPU implements ComponenteDeReloj {
     private long ciclosTotales;
     private long ciclosSO;
 
+    /**
+     * El sistema operativo le dice a la CPU que va a hacer en este ciclo.
+     * @param avanzaPc false cuando el ciclo es un despacho (el PC no se mueve)
+     */
     public void cargar(PCB pcb, ModoEjecucion modo, String instruccion, boolean avanzaPc) {
         this.actual = pcb;
         this.modo = modo;
@@ -28,6 +32,7 @@ public class CPU implements ComponenteDeReloj {
         cargar(null, ModoEjecucion.OCIOSO, "-", false);
     }
 
+    /** Ejecuta el ciclo: cuenta el uso y, si toca, sube el PC y el MAR del proceso. */
     @Override
     public void alTick(long ciclo) {
         ciclosTotales++;

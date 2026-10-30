@@ -1,6 +1,10 @@
 package unimet.avilaos.estructuras;
 
 
+/**
+ * Lista que siempre queda ordenada segun un Comparador. Es la cola de Listos:
+ * al cambiar la politica se cambia el comparador y se reordena.
+ */
 public class ListaOrdenada<T> {
 
     private ListaEnlazada<T> elementos = new ListaEnlazada<>();
@@ -13,6 +17,7 @@ public class ListaOrdenada<T> {
         this.comparador = comparador;
     }
 
+    /** Mete el dato en su lugar. Si empata con otro, queda detras (asi se respeta el orden de llegada). */
     public void insertar(T dato) {
         insertarOrdenado(elementos, comparador, dato);
     }
@@ -45,6 +50,7 @@ public class ListaOrdenada<T> {
         elementos.limpiar();
     }
 
+    /** Cambia el criterio de orden y reordena todo. Se usa al cambiar de politica. */
     public void cambiarComparador(Comparador<T> nuevo) {
         if (nuevo == null) {
             throw new IllegalArgumentException("El comparador no puede ser null");

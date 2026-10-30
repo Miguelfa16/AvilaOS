@@ -1,5 +1,6 @@
 package unimet.avilaos.estructuras;
 
+/** Cola FIFO sobre ListaEnlazada. La usamos para Nuevos, Bloqueados y Terminados. */
 public class Cola<T> {
 
     private final ListaEnlazada<T> elementos = new ListaEnlazada<>();
